@@ -38,15 +38,13 @@ internal class MyExporter : BaseExporter<LogRecord>
         var sb = new StringBuilder();
         foreach (var record in batch)
         {
-            if (sb.Length > 0)
+            Console.WriteLine("Record");
+            foreach (var kvp in record.Travel())
             {
-                sb.Append(", ");
+                Console.WriteLine($"  {kvp.Key}: {kvp.Value}");
             }
-
-            sb.Append($"{record}");
         }
 
-        Console.WriteLine($"{this.name}.Export([{sb.ToString()}])");
         return ExportResult.Success;
     }
 

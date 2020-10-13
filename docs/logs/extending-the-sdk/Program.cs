@@ -15,15 +15,20 @@
 // </copyright>
 
 using System.Collections.Generic;
+using System.Diagnostics;
 #if NETCOREAPP2_1
 using Microsoft.Extensions.DependencyInjection;
 #endif
 using Microsoft.Extensions.Logging;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
+using OpenTelemetry.Trace;
 
 public class Program
 {
+    private static readonly ActivitySource MyActivitySource = new ActivitySource(
+        "MyCompany.MyProduct.MyLibrary");
+
     public static void Main()
     {
 #if NETCOREAPP2_1
@@ -46,8 +51,15 @@ public class Program
         var logger = loggerFactory.CreateLogger<Program>();
 #endif
 
-        // unstructured log
-        logger.LogInformation("Hello, World!");
+        using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+            .AddSource("MyCompany.MyProduct.MyLibrary")
+            .Build();
+
+        using (var activity = MyActivitySource.StartActivity("SayHello"))
+        {
+            // unstructured log
+            logger.LogInformation("Hello, World!");
+        }
 
         // unstructured log with string interpolation
         logger.LogInformation($"Hello from potato {0.99}.");
