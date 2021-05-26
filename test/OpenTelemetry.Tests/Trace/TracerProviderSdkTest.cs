@@ -949,6 +949,54 @@ namespace OpenTelemetry.Trace.Tests
             Assert.True(testActivityProcessor.ForceFlushCalled);
         }
 
+        [Fact]
+        public void DotNet6Issue()
+        {
+            ActivitySource activitySource = new ActivitySource("TestActivity");
+
+            var listener = new ActivityListener
+            {
+                // Callback when Activity is started.
+                ActivityStarted = (activity) =>
+                {
+                    Console.WriteLine("Activity Started");
+                },
+
+                // Callback when Activity is stopped.
+                ActivityStopped = (activity) =>
+                {
+                    Console.WriteLine("Activity Stopped");
+                },
+            };
+
+            listener.Sample = (ref ActivityCreationOptions<ActivityContext> options) => this.ComputeActivitySamplingResult(options);
+            listener.ShouldListenTo = (activitySource) => true;
+            ActivitySource.AddActivityListener(listener);
+
+            // Set default Id format to true - this will create new activity.
+            Activity.ForceDefaultIdFormat = true;
+            using (var act = activitySource.StartActivity("customContext", ActivityKind.Client, "InvalidW3CIdParent"))
+            {
+                Assert.NotNull(act);
+            }
+
+            // Set default Id format to false - this will not create new activity.
+            Activity.ForceDefaultIdFormat = false;
+            using (var act = activitySource.StartActivity("customContext", ActivityKind.Client, "InvalidW3CIdParent"))
+            {
+                Assert.Null(act);
+            }
+
+            // Set default Id format back to true.
+            Activity.ForceDefaultIdFormat = true;
+        }
+
+        public ActivitySamplingResult ComputeActivitySamplingResult(
+            in ActivityCreationOptions<ActivityContext> options)
+        {
+            return ActivitySamplingResult.AllData;
+        }
+
         public void Dispose()
         {
             GC.SuppressFinalize(this);
