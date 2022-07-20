@@ -55,11 +55,11 @@ namespace OpenTelemetry.Exporter
                 state.PeerService = value;
                 state.PeerServicePriority = priority;
             }
-            else if (key == SemanticConventions.AttributeNetPeerName)
+            else if (key == SemanticConventions.AttributeNetSockPeerName)
             {
                 state.HostName = value;
             }
-            else if (key == SemanticConventions.AttributeNetPeerIp)
+            else if (key == SemanticConventions.AttributeNetSockPeerAddress)
             {
                 state.IpAddress = value;
             }

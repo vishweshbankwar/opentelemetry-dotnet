@@ -91,7 +91,7 @@ namespace OpenTelemetry.Instrumentation.Grpc.Tests
                 Assert.Equal("grpc", activity.GetTagValue(SemanticConventions.AttributeRpcSystem));
                 Assert.Equal("greet.Greeter", activity.GetTagValue(SemanticConventions.AttributeRpcService));
                 Assert.Equal("SayHello", activity.GetTagValue(SemanticConventions.AttributeRpcMethod));
-                Assert.Contains(activity.GetTagValue(SemanticConventions.AttributeNetPeerIp), clientLoopbackAddresses);
+                Assert.Contains(activity.GetTagValue(SemanticConventions.AttributeNetSockPeerAddress), clientLoopbackAddresses);
                 Assert.NotEqual(0, activity.GetTagValue(SemanticConventions.AttributeNetPeerPort));
                 Assert.Null(activity.GetTagValue(GrpcTagHelper.GrpcMethodTagName));
                 Assert.Null(activity.GetTagValue(GrpcTagHelper.GrpcStatusCodeTagName));
@@ -171,7 +171,7 @@ namespace OpenTelemetry.Instrumentation.Grpc.Tests
                     Assert.Equal("grpc", activity.GetTagValue(SemanticConventions.AttributeRpcSystem));
                     Assert.Equal("greet.Greeter", activity.GetTagValue(SemanticConventions.AttributeRpcService));
                     Assert.Equal("SayHello", activity.GetTagValue(SemanticConventions.AttributeRpcMethod));
-                    Assert.Contains(activity.GetTagValue(SemanticConventions.AttributeNetPeerIp), clientLoopbackAddresses);
+                    Assert.Contains(activity.GetTagValue(SemanticConventions.AttributeNetSockPeerAddress), clientLoopbackAddresses);
                     Assert.NotEqual(0, activity.GetTagValue(SemanticConventions.AttributeNetPeerPort));
                     Assert.Null(activity.GetTagValue(GrpcTagHelper.GrpcMethodTagName));
                     Assert.Null(activity.GetTagValue(GrpcTagHelper.GrpcStatusCodeTagName));

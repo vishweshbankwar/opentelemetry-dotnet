@@ -99,13 +99,13 @@ namespace OpenTelemetry.Instrumentation.Grpc.Tests
 
             if (uriHostNameType == UriHostNameType.IPv4 || uriHostNameType == UriHostNameType.IPv6)
             {
-                Assert.Equal(uri.Host, activity.GetTagValue(SemanticConventions.AttributeNetPeerIp));
-                Assert.Null(activity.GetTagValue(SemanticConventions.AttributeNetPeerName));
+                Assert.Equal(uri.Host, activity.GetTagValue(SemanticConventions.AttributeNetSockPeerAddress));
+                Assert.Null(activity.GetTagValue(SemanticConventions.AttributeNetSockPeerName));
             }
             else
             {
-                Assert.Null(activity.GetTagValue(SemanticConventions.AttributeNetPeerIp));
-                Assert.Equal(uri.Host, activity.GetTagValue(SemanticConventions.AttributeNetPeerName));
+                Assert.Null(activity.GetTagValue(SemanticConventions.AttributeNetSockPeerAddress));
+                Assert.Equal(uri.Host, activity.GetTagValue(SemanticConventions.AttributeNetSockPeerName));
             }
 
             Assert.Equal(uri.Port, activity.GetTagValue(SemanticConventions.AttributeNetPeerPort));

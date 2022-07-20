@@ -95,10 +95,10 @@ namespace OpenTelemetry.Instrumentation.SqlClient.Tests
             }
             else
             {
-                Assert.Equal(expectedServerHostName, activity.GetTagValue(SemanticConventions.AttributeNetPeerName));
+                Assert.Equal(expectedServerHostName, activity.GetTagValue(SemanticConventions.AttributeNetSockPeerName));
             }
 
-            Assert.Equal(expectedServerIpAddress, activity.GetTagValue(SemanticConventions.AttributeNetPeerIp));
+            Assert.Equal(expectedServerIpAddress, activity.GetTagValue(SemanticConventions.AttributeNetSockPeerAddress));
             Assert.Equal(expectedInstanceName, activity.GetTagValue(SemanticConventions.AttributeDbMsSqlInstanceName));
             Assert.Equal(expectedPort, activity.GetTagValue(SemanticConventions.AttributeNetPeerPort));
         }

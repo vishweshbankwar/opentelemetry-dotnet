@@ -26,12 +26,12 @@ namespace OpenTelemetry.Trace
         // https://github.com/open-telemetry/opentelemetry-specification/tree/main/specification/trace/semantic_conventions
         // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/exceptions.md
         public const string AttributeNetTransport = "net.transport";
-        public const string AttributeNetPeerIp = "net.peer.ip";
         public const string AttributeNetPeerPort = "net.peer.port";
-        public const string AttributeNetPeerName = "net.peer.name";
-        public const string AttributeNetHostIp = "net.host.ip";
         public const string AttributeNetHostPort = "net.host.port";
         public const string AttributeNetHostName = "net.host.name";
+        public const string AttributeNetSockHostAddress = "net.sock.host.addr";
+        public const string AttributeNetSockPeerAddress = "net.sock.peer.addr";
+        public const string AttributeNetSockPeerName = "net.sock.peer.name";
 
         public const string AttributeEnduserId = "enduser.id";
         public const string AttributeEnduserRole = "enduser.role";

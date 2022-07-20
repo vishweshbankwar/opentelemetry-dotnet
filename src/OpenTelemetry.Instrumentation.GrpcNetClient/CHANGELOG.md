@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+* **Breaking** Renamed `net.peer.ip` to `net.sock.peer.addr` and `net.peer.name`
+  to `net.sock.peer.name`.
+
 ## 1.0.0-rc9.4
 
 Released 2022-Jun-03

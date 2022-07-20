@@ -243,11 +243,11 @@ namespace OpenTelemetry.Instrumentation.SqlClient.Tests
 
                 if (!string.IsNullOrEmpty(connectionDetails.ServerHostName))
                 {
-                    Assert.Equal(connectionDetails.ServerHostName, activity.GetTagValue(SemanticConventions.AttributeNetPeerName));
+                    Assert.Equal(connectionDetails.ServerHostName, activity.GetTagValue(SemanticConventions.AttributeNetSockPeerName));
                 }
                 else
                 {
-                    Assert.Equal(connectionDetails.ServerIpAddress, activity.GetTagValue(SemanticConventions.AttributeNetPeerIp));
+                    Assert.Equal(connectionDetails.ServerIpAddress, activity.GetTagValue(SemanticConventions.AttributeNetSockPeerAddress));
                 }
 
                 if (!string.IsNullOrEmpty(connectionDetails.InstanceName))

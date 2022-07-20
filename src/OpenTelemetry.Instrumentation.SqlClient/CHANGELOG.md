@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* **Breaking** Renamed `net.peer.ip` to `net.sock.peer.addr` and `net.peer.name`
+  to `net.sock.peer.name`.
 * Update the `ActivitySource.Name` from "OpenTelemetry.SqlClient" to
   "OpenTelemetry.Instrumentation.SqlClient".
   ([#3435](https://github.com/open-telemetry/opentelemetry-dotnet/issues/3435))

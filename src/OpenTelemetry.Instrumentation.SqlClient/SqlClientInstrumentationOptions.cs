@@ -97,7 +97,7 @@ namespace OpenTelemetry.Instrumentation.SqlClient
         /// Gets or sets a value indicating whether or not the <see cref="SqlClientInstrumentation"/> should parse the DataSource on a SqlConnection into server name, instance name, and/or port connection-level attribute tags. Default value: False.
         /// </summary>
         /// <remarks>
-        /// The default behavior is to set the SqlConnection DataSource as the <see cref="SemanticConventions.AttributePeerService"/> tag. If enabled, SqlConnection DataSource will be parsed and the server name will be sent as the <see cref="SemanticConventions.AttributeNetPeerName"/> or <see cref="SemanticConventions.AttributeNetPeerIp"/> tag, the instance name will be sent as the <see cref="SemanticConventions.AttributeDbMsSqlInstanceName"/> tag, and the port will be sent as the <see cref="SemanticConventions.AttributeNetPeerPort"/> tag if it is not 1433 (the default port).
+        /// The default behavior is to set the SqlConnection DataSource as the <see cref="SemanticConventions.AttributePeerService"/> tag. If enabled, SqlConnection DataSource will be parsed and the server name will be sent as the <see cref="SemanticConventions.AttributeNetSockPeerName"/> or <see cref="SemanticConventions.AttributeNetSockPeerAddress"/> tag, the instance name will be sent as the <see cref="SemanticConventions.AttributeDbMsSqlInstanceName"/> tag, and the port will be sent as the <see cref="SemanticConventions.AttributeNetPeerPort"/> tag if it is not 1433 (the default port).
         /// </remarks>
         public bool EnableConnectionLevelAttributes { get; set; }
 
@@ -239,11 +239,11 @@ namespace OpenTelemetry.Instrumentation.SqlClient
 
                 if (!string.IsNullOrEmpty(connectionDetails.ServerHostName))
                 {
-                    sqlActivity.SetTag(SemanticConventions.AttributeNetPeerName, connectionDetails.ServerHostName);
+                    sqlActivity.SetTag(SemanticConventions.AttributeNetSockPeerName, connectionDetails.ServerHostName);
                 }
                 else
                 {
-                    sqlActivity.SetTag(SemanticConventions.AttributeNetPeerIp, connectionDetails.ServerIpAddress);
+                    sqlActivity.SetTag(SemanticConventions.AttributeNetSockPeerAddress, connectionDetails.ServerIpAddress);
                 }
 
                 if (!string.IsNullOrEmpty(connectionDetails.InstanceName))

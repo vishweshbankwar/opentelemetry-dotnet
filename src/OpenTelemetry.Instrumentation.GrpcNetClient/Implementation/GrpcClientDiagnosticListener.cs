@@ -117,11 +117,11 @@ namespace OpenTelemetry.Instrumentation.GrpcNetClient.Implementation
                 var uriHostNameType = Uri.CheckHostName(request.RequestUri.Host);
                 if (uriHostNameType == UriHostNameType.IPv4 || uriHostNameType == UriHostNameType.IPv6)
                 {
-                    activity.SetTag(SemanticConventions.AttributeNetPeerIp, request.RequestUri.Host);
+                    activity.SetTag(SemanticConventions.AttributeNetSockPeerAddress, request.RequestUri.Host);
                 }
                 else
                 {
-                    activity.SetTag(SemanticConventions.AttributeNetPeerName, request.RequestUri.Host);
+                    activity.SetTag(SemanticConventions.AttributeNetSockPeerName, request.RequestUri.Host);
                 }
 
                 activity.SetTag(SemanticConventions.AttributeNetPeerPort, request.RequestUri.Port);

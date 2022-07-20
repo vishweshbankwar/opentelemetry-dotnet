@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* **Breaking** Renamed `net.peer.ip` to `net.sock.peer.addr` for Grpc.
 * Metrics instrumentation to correctly populate `http.flavor` tag.
   (1.1 instead of HTTP/1.1 etc.)
   ([3379](https://github.com/open-telemetry/opentelemetry-dotnet/pull/3379))
