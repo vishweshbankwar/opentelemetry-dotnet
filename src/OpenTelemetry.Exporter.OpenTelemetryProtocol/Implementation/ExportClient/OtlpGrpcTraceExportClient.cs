@@ -16,7 +16,11 @@
 
 using System;
 using System.Threading;
+using Google.Protobuf;
 using Grpc.Core;
+using OpenTelemetry.Extensions.PersistentStorage;
+using OpenTelemetry.Extensions.PersistentStorage.Abstractions;
+using OpenTelemetry.Proto.Collector.Trace.V1;
 using OtlpCollector = OpenTelemetry.Proto.Collector.Trace.V1;
 
 namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClient
@@ -25,6 +29,7 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
     internal sealed class OtlpGrpcTraceExportClient : BaseOtlpGrpcExportClient<OtlpCollector.ExportTraceServiceRequest>
     {
         private readonly OtlpCollector.TraceService.TraceServiceClient traceClient;
+        private readonly PersistentBlobProvider fileBlobProvider;
 
         public OtlpGrpcTraceExportClient(OtlpExporterOptions options, OtlpCollector.TraceService.TraceServiceClient traceServiceClient = null)
             : base(options)
@@ -38,6 +43,9 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
                 this.Channel = options.CreateChannel();
                 this.traceClient = new OtlpCollector.TraceService.TraceServiceClient(this.Channel);
             }
+
+            var dir = @"C:\Users\vibankwa\source\repos\data";
+            this.fileBlobProvider = new FileBlobProvider(dir);
         }
 
         /// <inheritdoc/>
@@ -53,7 +61,32 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
             {
                 OpenTelemetryProtocolExporterEventSource.Log.FailedToReachCollector(this.Endpoint, ex);
 
+                this.fileBlobProvider.TryCreateBlob(request.ToByteArray(), out _);
+
                 return false;
+            }
+
+            // Try Sending files from storage
+            while (this.fileBlobProvider.TryGetBlob(out var blob) && blob.TryLease(1000))
+            {
+                var storageRequest = new ExportTraceServiceRequest();
+                blob.TryRead(out var data);
+                storageRequest.MergeFrom(data);
+
+                // send request
+                try
+                {
+                    deadline = DateTime.UtcNow.AddMilliseconds(this.TimeoutMilliseconds);
+                    this.traceClient.Export(storageRequest, headers: this.Headers, deadline: deadline, cancellationToken: cancellationToken);
+
+                    // delete for successful request
+                    blob.TryDelete();
+                }
+                catch (RpcException ex)
+                {
+                    OpenTelemetryProtocolExporterEventSource.Log.FailedToReachCollector(this.Endpoint, ex);
+                    blob.TryLease(1000);
+                }
             }
 
             return true;

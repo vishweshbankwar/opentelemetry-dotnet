@@ -14,6 +14,7 @@
 // limitations under the License.
 // </copyright>
 
+using System;
 using System.Diagnostics;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
@@ -29,15 +30,21 @@ public class Program
     {
         using var tracerProvider = Sdk.CreateTracerProviderBuilder()
             .AddSource("MyCompany.MyProduct.MyLibrary")
+            .AddOtlpExporter()
             .AddConsoleExporter()
             .Build();
 
+        //for (int i =0;i < 10; i++)
+        //{
         using (var activity = MyActivitySource.StartActivity("SayHello"))
-        {
-            activity?.SetTag("foo", 1);
-            activity?.SetTag("bar", "Hello, World!");
-            activity?.SetTag("baz", new int[] { 1, 2, 3 });
-            activity?.SetStatus(ActivityStatusCode.Ok);
-        }
+            {
+                activity?.SetTag("foo", 1);
+                activity?.SetTag("bar", "Hello, World!");
+                activity?.SetTag("baz", new int[] { 1, 2, 3 });
+                activity?.SetStatus(ActivityStatusCode.Ok);
+            }
+        //}
+
+        Console.ReadLine();
     }
 }
