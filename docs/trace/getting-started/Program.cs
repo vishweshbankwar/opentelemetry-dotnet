@@ -34,9 +34,9 @@ public class Program
             .AddConsoleExporter()
             .Build();
 
-        //for (int i =0;i < 10; i++)
+        //for (int i = 0; i < 10; i++)
         //{
-        using (var activity = MyActivitySource.StartActivity("SayHello"))
+            using (var activity = MyActivitySource.StartActivity("SayHello"))
             {
                 activity?.SetTag("foo", 1);
                 activity?.SetTag("bar", "Hello, World!");
