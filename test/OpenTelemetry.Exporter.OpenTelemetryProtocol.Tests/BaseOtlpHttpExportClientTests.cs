@@ -16,6 +16,7 @@
 
 using System;
 using System.Net.Http;
+using System.Threading;
 using OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClient;
 using Xunit;
 
@@ -56,6 +57,11 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests
             public TestOtlpHttpExportClient(OtlpExporterOptions options, HttpClient httpClient)
                 : base(options, httpClient, "signal/path")
             {
+            }
+
+            public override bool SendExportRequest(string request, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
             }
 
             protected override HttpContent CreateHttpContent(string exportRequest)

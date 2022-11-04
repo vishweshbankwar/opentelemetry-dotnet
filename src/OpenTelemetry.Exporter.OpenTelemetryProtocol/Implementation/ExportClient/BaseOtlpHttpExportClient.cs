@@ -48,25 +48,7 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
         internal IReadOnlyDictionary<string, string> Headers { get; }
 
         /// <inheritdoc/>
-        public bool SendExportRequest(TRequest request, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                using var httpRequest = this.CreateHttpRequest(request);
-
-                using var httpResponse = this.SendHttpRequest(httpRequest, cancellationToken);
-
-                httpResponse?.EnsureSuccessStatusCode();
-            }
-            catch (HttpRequestException ex)
-            {
-                OpenTelemetryProtocolExporterEventSource.Log.FailedToReachCollector(this.Endpoint, ex);
-
-                return false;
-            }
-
-            return true;
-        }
+        public abstract bool SendExportRequest(TRequest request, CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
         public bool Shutdown(int timeoutMilliseconds)

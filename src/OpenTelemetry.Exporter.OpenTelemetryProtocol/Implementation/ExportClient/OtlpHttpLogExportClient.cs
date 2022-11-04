@@ -19,9 +19,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
-#if NET6_0_OR_GREATER
 using System.Threading;
-#endif
 using System.Threading.Tasks;
 using Google.Protobuf;
 using OtlpCollector = OpenTelemetry.Proto.Collector.Logs.V1;
@@ -37,6 +35,27 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
         public OtlpHttpLogExportClient(OtlpExporterOptions options, HttpClient httpClient)
             : base(options, httpClient, LogsExportPath)
         {
+        }
+
+        /// <inheritdoc/>
+        public override bool SendExportRequest(OtlpCollector.ExportLogsServiceRequest request, CancellationToken cancellationToken = default)
+        {
+            using var httpRequest = this.CreateHttpRequest(request);
+
+            try
+            {
+                using var httpResponse = this.SendHttpRequest(httpRequest, cancellationToken);
+
+                httpResponse?.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex)
+            {
+                OpenTelemetryProtocolExporterEventSource.Log.FailedToReachCollector(this.Endpoint, ex);
+
+                return false;
+            }
+
+            return true;
         }
 
         protected override HttpContent CreateHttpContent(OtlpCollector.ExportLogsServiceRequest exportRequest)
