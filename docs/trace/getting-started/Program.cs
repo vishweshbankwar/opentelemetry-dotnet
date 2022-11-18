@@ -30,7 +30,8 @@ public class Program
     {
         using var tracerProvider = Sdk.CreateTracerProviderBuilder()
             .AddSource("MyCompany.MyProduct.MyLibrary")
-            .AddOtlpExporter(o => o.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.HttpProtobuf)
+            //.AddOtlpExporter()
+            .AddJaegerExporter()
             .AddConsoleExporter()
             .Build();
 

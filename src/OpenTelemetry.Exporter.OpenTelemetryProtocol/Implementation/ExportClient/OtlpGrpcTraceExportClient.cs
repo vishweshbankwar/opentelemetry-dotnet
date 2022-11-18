@@ -29,7 +29,7 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
     internal sealed class OtlpGrpcTraceExportClient : BaseOtlpGrpcExportClient<OtlpCollector.ExportTraceServiceRequest>
     {
         private readonly OtlpCollector.TraceService.TraceServiceClient traceClient;
-        private readonly PersistentBlobProvider fileBlobProvider;
+        private readonly FileBlobProvider fileBlobProvider;
 
         public OtlpGrpcTraceExportClient(OtlpExporterOptions options, OtlpCollector.TraceService.TraceServiceClient traceServiceClient = null)
             : base(options)
@@ -46,6 +46,8 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
 
             var dir = @"C:\Users\vibankwa\source\repos\data";
             this.fileBlobProvider = new FileBlobProvider(dir);
+
+            new OtlpTraceExporterOfflineStorage(this.traceClient, this.Headers, this.fileBlobProvider);
         }
 
         /// <inheritdoc/>
@@ -64,29 +66,6 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
                 this.fileBlobProvider.TryCreateBlob(request.ToByteArray(), out _);
 
                 return false;
-            }
-
-            // Try Sending files from storage
-            while (this.fileBlobProvider.TryGetBlob(out var blob) && blob.TryLease(1000))
-            {
-                var storageRequest = new ExportTraceServiceRequest();
-                blob.TryRead(out var data);
-                storageRequest.MergeFrom(data);
-
-                // send request
-                try
-                {
-                    deadline = DateTime.UtcNow.AddMilliseconds(this.TimeoutMilliseconds);
-                    this.traceClient.Export(storageRequest, headers: this.Headers, deadline: deadline, cancellationToken: cancellationToken);
-
-                    // delete for successful request
-                    blob.TryDelete();
-                }
-                catch (RpcException ex)
-                {
-                    OpenTelemetryProtocolExporterEventSource.Log.FailedToReachCollector(this.Endpoint, ex);
-                    blob.TryLease(1000);
-                }
             }
 
             return true;
