@@ -30,9 +30,9 @@ public class Program
     {
         using var tracerProvider = Sdk.CreateTracerProviderBuilder()
             .AddSource("MyCompany.MyProduct.MyLibrary")
-            //.AddOtlpExporter()
-            .AddJaegerExporter()
-            .AddConsoleExporter()
+            .AddOtlpExporter()
+            //.AddJaegerExporter()
+            //.AddConsoleExporter()
             .Build();
 
         //for (int i = 0; i < 10; i++)
