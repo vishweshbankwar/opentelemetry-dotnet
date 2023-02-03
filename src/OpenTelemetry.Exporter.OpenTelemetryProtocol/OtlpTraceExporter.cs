@@ -17,6 +17,7 @@
 using System.Diagnostics;
 using OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation;
 using OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClient;
+using OpenTelemetry.Extensions.PersistentStorage.Abstractions;
 using OtlpCollector = OpenTelemetry.Proto.Collector.Trace.V1;
 using OtlpResource = OpenTelemetry.Proto.Resource.V1;
 
@@ -38,7 +39,7 @@ namespace OpenTelemetry.Exporter
         /// </summary>
         /// <param name="options">Configuration options for the export.</param>
         public OtlpTraceExporter(OtlpExporterOptions options)
-            : this(options, new(), null)
+            : this(options, new(), null, null)
         {
         }
 
@@ -51,7 +52,8 @@ namespace OpenTelemetry.Exporter
         internal OtlpTraceExporter(
             OtlpExporterOptions exporterOptions,
             SdkLimitOptions sdkLimitOptions,
-            IExportClient<OtlpCollector.ExportTraceServiceRequest> exportClient = null)
+            IExportClient<OtlpCollector.ExportTraceServiceRequest> exportClient = null,
+            PersistentBlobProvider persistentBlobProvider = null)
         {
             Debug.Assert(exporterOptions != null, "exporterOptions was null");
             Debug.Assert(sdkLimitOptions != null, "sdkLimitOptions was null");
@@ -64,7 +66,7 @@ namespace OpenTelemetry.Exporter
             }
             else
             {
-                this.exportClient = exporterOptions.GetTraceExportClient();
+                this.exportClient = exporterOptions.GetTraceExportClient(persistentBlobProvider);
             }
         }
 

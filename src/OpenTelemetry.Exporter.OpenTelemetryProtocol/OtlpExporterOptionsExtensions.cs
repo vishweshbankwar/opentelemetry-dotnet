@@ -26,6 +26,7 @@ using Grpc.Net.Client;
 using LogOtlpCollector = OpenTelemetry.Proto.Collector.Logs.V1;
 using MetricsOtlpCollector = OpenTelemetry.Proto.Collector.Metrics.V1;
 using TraceOtlpCollector = OpenTelemetry.Proto.Collector.Trace.V1;
+using OpenTelemetry.Extensions.PersistentStorage.Abstractions;
 
 namespace OpenTelemetry.Exporter
 {
@@ -97,10 +98,10 @@ namespace OpenTelemetry.Exporter
             return headers;
         }
 
-        public static IExportClient<TraceOtlpCollector.ExportTraceServiceRequest> GetTraceExportClient(this OtlpExporterOptions options) =>
+        public static IExportClient<TraceOtlpCollector.ExportTraceServiceRequest> GetTraceExportClient(this OtlpExporterOptions options, PersistentBlobProvider persistentBlobProvider = null) =>
             options.Protocol switch
             {
-                OtlpExportProtocol.Grpc => new OtlpGrpcTraceExportClient(options),
+                OtlpExportProtocol.Grpc => new OtlpGrpcTraceExportClient(options, null, persistentBlobProvider),
                 OtlpExportProtocol.HttpProtobuf => new OtlpHttpTraceExportClient(
                     options,
                     options.HttpClientFactory?.Invoke() ?? throw new InvalidOperationException("OtlpExporterOptions was missing HttpClientFactory or it returned null.")),

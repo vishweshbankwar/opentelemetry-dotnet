@@ -15,7 +15,11 @@
 // </copyright>
 
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenTelemetry;
+using OpenTelemetry.Extensions.PersistentStorage;
+using OpenTelemetry.Extensions.PersistentStorage.Abstractions;
 using OpenTelemetry.Trace;
 
 namespace GettingStarted;
@@ -29,7 +33,8 @@ public class Program
     {
         using var tracerProvider = Sdk.CreateTracerProviderBuilder()
             .AddSource("MyCompany.MyProduct.MyLibrary")
-            .AddConsoleExporter()
+            .ConfigureServices(s => s.AddSingleton<PersistentBlobProvider, FileBlobProvider>((sp) => { return new FileBlobProvider("C:\\Users\\vibankwa\\source\\repos\\data\\otlptest"); }))
+            .AddOtlpExporter()
             .Build();
 
         using (var activity = MyActivitySource.StartActivity("SayHello"))
@@ -39,5 +44,7 @@ public class Program
             activity?.SetTag("baz", new int[] { 1, 2, 3 });
             activity?.SetStatus(ActivityStatusCode.Ok);
         }
+
+        Thread.Sleep(100000);
     }
 }

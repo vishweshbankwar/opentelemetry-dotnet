@@ -14,7 +14,9 @@
 // limitations under the License.
 // </copyright>
 
+using Google.Protobuf;
 using Grpc.Core;
+using OpenTelemetry.Extensions.PersistentStorage.Abstractions;
 using OtlpCollector = OpenTelemetry.Proto.Collector.Trace.V1;
 
 namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClient
@@ -24,7 +26,12 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
     {
         private readonly OtlpCollector.TraceService.TraceServiceClient traceClient;
 
-        public OtlpGrpcTraceExportClient(OtlpExporterOptions options, OtlpCollector.TraceService.TraceServiceClient traceServiceClient = null)
+        private readonly PersistentBlobProvider persistentBlobProvider;
+
+        public OtlpGrpcTraceExportClient(
+            OtlpExporterOptions options,
+            OtlpCollector.TraceService.TraceServiceClient traceServiceClient = null,
+            PersistentBlobProvider persistentBlobProvider = null)
             : base(options)
         {
             if (traceServiceClient != null)
@@ -35,6 +42,11 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
             {
                 this.Channel = options.CreateChannel();
                 this.traceClient = new OtlpCollector.TraceService.TraceServiceClient(this.Channel);
+            }
+
+            if (persistentBlobProvider != null)
+            {
+                this.persistentBlobProvider = persistentBlobProvider;
             }
         }
 
@@ -49,6 +61,12 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClie
             }
             catch (RpcException ex)
             {
+                // TODO: check for retryable error codes before doing this
+                if (this.persistentBlobProvider.TryCreateBlob(request.ToByteArray(), out _))
+                {
+                    return true;
+                }
+
                 OpenTelemetryProtocolExporterEventSource.Log.FailedToReachCollector(this.Endpoint, ex);
 
                 return false;

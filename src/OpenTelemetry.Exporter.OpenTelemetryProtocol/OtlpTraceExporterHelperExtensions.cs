@@ -19,6 +19,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation;
+using OpenTelemetry.Extensions.PersistentStorage.Abstractions;
 using OpenTelemetry.Internal;
 
 namespace OpenTelemetry.Trace
@@ -106,7 +107,17 @@ namespace OpenTelemetry.Trace
         {
             exporterOptions.TryEnableIHttpClientFactoryIntegration(serviceProvider, "OtlpTraceExporter");
 
-            BaseExporter<Activity> otlpExporter = new OtlpTraceExporter(exporterOptions, sdkLimitOptions);
+            PersistentBlobProvider persistentBlobProvider = null;
+            try
+            {
+                persistentBlobProvider = serviceProvider.GetRequiredService<PersistentBlobProvider>();
+            }
+            catch (Exception)
+            {
+                // log
+            }
+
+            BaseExporter<Activity> otlpExporter = new OtlpTraceExporter(exporterOptions, sdkLimitOptions, null, persistentBlobProvider);
 
             if (configureExporterInstance != null)
             {
