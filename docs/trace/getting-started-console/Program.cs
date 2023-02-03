@@ -33,7 +33,7 @@ public class Program
     {
         using var tracerProvider = Sdk.CreateTracerProviderBuilder()
             .AddSource("MyCompany.MyProduct.MyLibrary")
-            .ConfigureServices(s => s.AddSingleton<PersistentBlobProvider, FileBlobProvider>((sp) => { return new FileBlobProvider("C:\\Users\\vibankwa\\source\\repos\\data\\otlptest"); }))
+            .ConfigureServices(s => s.AddSingleton<PersistentBlobProvider, FileBlobProvider>((sp) => { return new FileBlobProvider("path"); }))
             .AddOtlpExporter()
             .Build();
 
