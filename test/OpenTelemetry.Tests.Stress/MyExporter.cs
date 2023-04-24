@@ -1,4 +1,4 @@
-// <copyright file="Meat.cs" company="OpenTelemetry Authors">
+// <copyright file="MyExporter.cs" company="OpenTelemetry Authors">
 // Copyright The OpenTelemetry Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +14,17 @@
 // limitations under the License.
 // </copyright>
 
-using System.Runtime.CompilerServices;
-using OpenTelemetry.Trace;
+using System.Diagnostics;
+using OpenTelemetry;
 
-namespace OpenTelemetry.Tests.Stress;
-
-public partial class Program
+internal class MyExporter : BaseExporter<Activity>
 {
-    public static void Main()
+    public MyExporter()
     {
-        Stress(prometheusPort: 9464);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static void Run()
+    public override ExportResult Export(in Batch<Activity> batch)
     {
-        using var tracerProvider = Sdk.CreateTracerProviderBuilder()
-            .AddProcessor(new BatchActivityExportProcessor(new MyExporter()))
-            .Build();
+        return ExportResult.Success;
     }
 }
