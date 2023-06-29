@@ -160,6 +160,26 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests
             Assert.Equal("OTEL_EXPORTER_OTLP_PROTOCOL", OtlpExporterOptions.ProtocolEnvVarName);
         }
 
+#if NET6_0_OR_GREATER
+        [Fact]
+        public void SetHttpClientViaGrpcChannelOptions()
+        {
+            using var httpClient = new HttpClient() { DefaultRequestVersion = new Version(2, 0), DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact };
+            var options = new OtlpExporterOptions()
+            {
+                Protocol = OtlpExportProtocol.Grpc,
+                HttpClientFactory = () => httpClient,
+            };
+            var channel = options.CreateChannel();
+            var bindingFlags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance;
+            var grpcHttpClient = (HttpClient)channel.GetType()
+                .GetProperty("HttpInvoker", bindingFlags)
+                .GetValue(channel) as HttpMessageInvoker;
+
+            Assert.Equal(httpClient, grpcHttpClient);
+        }
+#endif
+
         private static void ClearEnvVars()
         {
             Environment.SetEnvironmentVariable(OtlpExporterOptions.EndpointEnvVarName, null);

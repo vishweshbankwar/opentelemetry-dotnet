@@ -43,7 +43,16 @@ namespace OpenTelemetry.Exporter
             }
 
 #if NETSTANDARD2_1 || NET6_0_OR_GREATER
-            return GrpcChannel.ForAddress(options.Endpoint);
+            if (options.HttpClientFactory != options.DefaultHttpClientFactory)
+            {
+                var httpClient = options.HttpClientFactory?.Invoke() ?? throw new InvalidOperationException("OtlpExporterOptions was missing HttpClientFactory or it returned null.");
+
+                return GrpcChannel.ForAddress(options.Endpoint, new GrpcChannelOptions() { HttpClient = httpClient });
+            }
+            else
+            {
+                return GrpcChannel.ForAddress(options.Endpoint);
+            }
 #else
             ChannelCredentials channelCredentials;
             if (options.Endpoint.Scheme == Uri.UriSchemeHttps)
@@ -130,7 +139,6 @@ namespace OpenTelemetry.Exporter
         public static void TryEnableIHttpClientFactoryIntegration(this OtlpExporterOptions options, IServiceProvider serviceProvider, string httpClientName)
         {
             if (serviceProvider != null
-                && options.Protocol == OtlpExportProtocol.HttpProtobuf
                 && options.HttpClientFactory == options.DefaultHttpClientFactory)
             {
                 options.HttpClientFactory = () =>

@@ -79,15 +79,17 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests
             Assert.Throws<ArgumentNullException>(() => builder.AddOtlpExporter());
         }
 
-        [Fact]
-        public void UserHttpFactoryCalled()
+        [Theory]
+        [InlineData(OtlpExportProtocol.HttpProtobuf)]
+        [InlineData(OtlpExportProtocol.Grpc)]
+        public void UserHttpFactoryCalled(OtlpExportProtocol protocol)
         {
             OtlpExporterOptions options = new OtlpExporterOptions();
 
             var defaultFactory = options.HttpClientFactory;
 
             int invocations = 0;
-            options.Protocol = OtlpExportProtocol.HttpProtobuf;
+            options.Protocol = protocol;
             options.HttpClientFactory = () =>
             {
                 invocations++;
@@ -102,7 +104,7 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests
             using (var provider = Sdk.CreateTracerProviderBuilder()
                 .AddOtlpExporter(o =>
                 {
-                    o.Protocol = OtlpExportProtocol.HttpProtobuf;
+                    o.Protocol = protocol;
                     o.HttpClientFactory = options.HttpClientFactory;
                 })
                 .Build())
@@ -123,8 +125,10 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests
             });
         }
 
-        [Fact]
-        public void ServiceProviderHttpClientFactoryInvoked()
+        [Theory]
+        [InlineData(OtlpExportProtocol.HttpProtobuf)]
+        [InlineData(OtlpExportProtocol.Grpc)]
+        public void ServiceProviderHttpClientFactoryInvoked(OtlpExportProtocol protocol)
         {
             IServiceCollection services = new ServiceCollection();
 
@@ -135,7 +139,7 @@ namespace OpenTelemetry.Exporter.OpenTelemetryProtocol.Tests
             services.AddHttpClient("OtlpTraceExporter", configureClient: (client) => invocations++);
 
             services.AddOpenTelemetry().WithTracing(builder => builder
-                .AddOtlpExporter(o => o.Protocol = OtlpExportProtocol.HttpProtobuf));
+                .AddOtlpExporter(o => o.Protocol = protocol));
 
             using var serviceProvider = services.BuildServiceProvider();
 
