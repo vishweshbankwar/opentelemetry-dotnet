@@ -84,26 +84,26 @@ namespace OpenTelemetry.Instrumentation.AspNetCore.Implementation
             {
                 case OnStartEvent:
                     {
-                        this.OnStartActivity(Activity.Current, payload);
+                        // this.OnStartActivity(Activity.Current, payload);
                     }
 
                     break;
                 case OnStopEvent:
                     {
-                        this.OnStopActivity(Activity.Current, payload);
+                        // this.OnStopActivity(Activity.Current, payload);
                     }
 
                     break;
                 case OnMvcBeforeActionEvent:
                     {
-                        this.OnMvcBeforeAction(Activity.Current, payload);
+                        // this.OnMvcBeforeAction(Activity.Current, payload);
                     }
 
                     break;
                 case OnUnhandledHostingExceptionEvent:
                 case OnUnHandledDiagnosticsExceptionEvent:
                     {
-                        this.OnException(Activity.Current, payload);
+                        // this.OnException(Activity.Current, payload);
                     }
 
                     break;
