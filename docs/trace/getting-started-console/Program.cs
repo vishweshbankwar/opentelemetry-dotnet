@@ -15,7 +15,10 @@
 // </copyright>
 
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
+using OpenTelemetry.Exporter.OpenTelemetryProtocol;
+using OpenTelemetry.Proto.Collector.Trace.V1;
 using OpenTelemetry.Trace;
 
 namespace GettingStarted;
@@ -28,8 +31,10 @@ public class Program
     public static void Main()
     {
         using var tracerProvider = Sdk.CreateTracerProviderBuilder()
+            .ConfigureServices(services => services.AddSingleton<Retry<ExportTraceServiceRequest>>(sp => new MyCustomRetryHandler()))
             .AddSource("MyCompany.MyProduct.MyLibrary")
-            .AddConsoleExporter()
+            .AddOtlpExporter()
+            // .AddConsoleExporter()
             .Build();
 
         using (var activity = MyActivitySource.StartActivity("SayHello"))
@@ -39,5 +44,7 @@ public class Program
             activity?.SetTag("baz", new int[] { 1, 2, 3 });
             activity?.SetStatus(ActivityStatusCode.Ok);
         }
+
+        Console.ReadLine();
     }
 }

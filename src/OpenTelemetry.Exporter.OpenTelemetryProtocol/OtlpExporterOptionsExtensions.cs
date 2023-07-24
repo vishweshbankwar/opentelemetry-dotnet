@@ -26,6 +26,7 @@ using Grpc.Net.Client;
 using LogOtlpCollector = OpenTelemetry.Proto.Collector.Logs.V1;
 using MetricsOtlpCollector = OpenTelemetry.Proto.Collector.Metrics.V1;
 using TraceOtlpCollector = OpenTelemetry.Proto.Collector.Trace.V1;
+using OpenTelemetry.Exporter.OpenTelemetryProtocol;
 
 namespace OpenTelemetry.Exporter;
 

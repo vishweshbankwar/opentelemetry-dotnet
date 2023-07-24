@@ -15,6 +15,7 @@
 // </copyright>
 
 using System.Diagnostics;
+using OpenTelemetry.Exporter.OpenTelemetryProtocol;
 using OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation;
 using OpenTelemetry.Exporter.OpenTelemetryProtocol.Implementation.ExportClient;
 using OpenTelemetry.Internal;
@@ -31,6 +32,7 @@ public class OtlpTraceExporter : BaseExporter<Activity>
 {
     private readonly SdkLimitOptions sdkLimitOptions;
     private readonly IExportClient<OtlpCollector.ExportTraceServiceRequest> exportClient;
+    private readonly Retry<OtlpCollector.ExportTraceServiceRequest> retryHandler;
 
     private OtlpResource.Resource processResource;
 
@@ -48,16 +50,19 @@ public class OtlpTraceExporter : BaseExporter<Activity>
     /// </summary>
     /// <param name="exporterOptions"><see cref="OtlpExporterOptions"/>.</param>
     /// <param name="sdkLimitOptions"><see cref="SdkLimitOptions"/>.</param>
+    /// <param name="retryHandler"><see cref="Retry{T}"/>.</param>
     /// <param name="exportClient">Client used for sending export request.</param>
     internal OtlpTraceExporter(
         OtlpExporterOptions exporterOptions,
         SdkLimitOptions sdkLimitOptions,
+        Retry<OtlpCollector.ExportTraceServiceRequest> retryHandler,
         IExportClient<OtlpCollector.ExportTraceServiceRequest> exportClient = null)
     {
         Debug.Assert(exporterOptions != null, "exporterOptions was null");
         Debug.Assert(sdkLimitOptions != null, "sdkLimitOptions was null");
 
         this.sdkLimitOptions = sdkLimitOptions;
+        this.retryHandler = retryHandler;
 
         OtlpKeyValueTransformer.LogUnsupportedAttributeType = (string tagValueType, string tagKey) =>
         {
@@ -76,6 +81,7 @@ public class OtlpTraceExporter : BaseExporter<Activity>
         else
         {
             this.exportClient = exporterOptions.GetTraceExportClient();
+            retryHandler.ExportClient = this.exportClient;
         }
     }
 
@@ -93,7 +99,7 @@ public class OtlpTraceExporter : BaseExporter<Activity>
         {
             request.AddBatch(this.sdkLimitOptions, this.ProcessResource, activityBatch);
 
-            if (!this.exportClient.SendExportRequest(request))
+            if (!this.retryHandler.OnRequestSend(request))
             {
                 return ExportResult.Failure;
             }

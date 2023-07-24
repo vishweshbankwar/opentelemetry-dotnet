@@ -644,7 +644,7 @@ public class OtlpTraceExporterTests : Http2UnencryptedSupportTests
     {
         var exportClientMock = new Mock<IExportClient<OtlpCollector.ExportTraceServiceRequest>>();
 
-        var exporter = new OtlpTraceExporter(new OtlpExporterOptions(), DefaultSdkLimitOptions, exportClientMock.Object);
+        var exporter = new OtlpTraceExporter(new OtlpExporterOptions(), DefaultSdkLimitOptions, null, exportClientMock.Object);
 
         var result = exporter.Shutdown();
 

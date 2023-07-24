@@ -41,7 +41,7 @@ internal sealed class OtlpGrpcTraceExportClient : BaseOtlpGrpcExportClient<OtlpC
     /// <inheritdoc/>
     public override bool SendExportRequest(OtlpCollector.ExportTraceServiceRequest request, CancellationToken cancellationToken = default)
     {
-        var deadline = DateTime.UtcNow.AddMilliseconds(this.TimeoutMilliseconds);
+        var deadline = DateTime.UtcNow.AddMilliseconds(100000);
 
         try
         {
