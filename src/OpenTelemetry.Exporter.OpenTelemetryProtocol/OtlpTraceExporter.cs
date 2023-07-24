@@ -81,6 +81,9 @@ public class OtlpTraceExporter : BaseExporter<Activity>
         else
         {
             this.exportClient = exporterOptions.GetTraceExportClient();
+
+            // Set the export client here at a later stage
+            // it will be only available to implemented classes via SendExportRequest()
             retryHandler.ExportClient = this.exportClient;
         }
     }
