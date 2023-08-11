@@ -33,6 +33,7 @@ internal class MyProcessor : BaseProcessor<Activity>
 
     public override void OnEnd(Activity activity)
     {
+        throw new Exception("ex");
         Console.WriteLine($"{this.name}.OnEnd({activity.DisplayName})");
     }
 

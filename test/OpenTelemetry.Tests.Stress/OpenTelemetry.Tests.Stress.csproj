@@ -2,11 +2,24 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <!-- OmniSharp/VS Code requires TargetFrameworks to be in descending order for IntelliSense and analysis. -->
-    <TargetFrameworks>net7.0;net6.0;net462</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;</TargetFrameworks>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Grpc.AspNetCore.Server" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" VersionOverride="6.0.0" />
+    <PackageReference Include="Grpc.AspNetCore.Server" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Logging" />
+    <ProjectReference Include="$(RepoRoot)\src\OpenTelemetry.Exporter.OpenTelemetryProtocol\OpenTelemetry.Exporter.OpenTelemetryProtocol.csproj" />
   </ItemGroup>
 
   <ItemGroup>
