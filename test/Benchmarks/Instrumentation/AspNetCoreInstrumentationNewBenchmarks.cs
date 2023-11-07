@@ -88,32 +88,32 @@ public class AspNetCoreInstrumentationNewBenchmarks
     private HttpClient httpClient;
     private WebApplication app;
     private TracerProvider tracerProvider;
+    private IDisposable diagnosticSourceSubscriber;
 
-    [Flags]
     public enum EnableInstrumentationOption
     {
         /// <summary>
         /// Instrumentation is not enabled for any signal.
         /// </summary>
-        None = 0,
+        None,
 
         /// <summary>
         /// Instrumentation is enabled only for Traces.
         /// </summary>
-        TracesWithInstrumentation = 1,
+        TracesWithInstrumentationLibrary,
+
+        /// <summary>
+        /// Diagnostic Source Subscription (To measure overhead caused by Diag Src Subscriptions).
+        /// </summary>
+        DiagnosticSourceSubscription,
 
         /// <summary>
         /// Instrumentation is enabled via middleware only for Traces.
         /// </summary>
-        TracesWithMiddleware = 2,
-
-        /// <summary>
-        /// Instrumentation via diagnosticSource only for Traces.
-        /// </summary>
-        DiagnosticSourceSubscription = 3,
+        TracesWithMiddlewareInstrumentation,
     }
 
-    [Params(0, 1, 2, 3)]
+    [ParamsAllValues]
     public EnableInstrumentationOption EnableInstrumentation { get; set; }
 
     [GlobalSetup(Target = nameof(GetRequestForAspNetCoreApp))]
@@ -129,17 +129,18 @@ public class AspNetCoreInstrumentationNewBenchmarks
             this.StartWebApplication();
             this.httpClient = new HttpClient();
         }
-        else if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithInstrumentation)
+        else if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithInstrumentationLibrary)
         {
             this.StartWebApplication();
             this.httpClient = new HttpClient();
 
             this.tracerProvider = Sdk.CreateTracerProviderBuilder()
                 .ConfigureServices(services => services.AddSingleton<IConfiguration>(configuration))
+                .SetSampler(new AlwaysOnSampler())
                 .AddAspNetCoreInstrumentation()
                 .Build();
         }
-        else if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithMiddleware)
+        else if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithMiddlewareInstrumentation)
         {
             this.StartWebApplication();
             this.httpClient = new HttpClient();
@@ -154,11 +155,17 @@ public class AspNetCoreInstrumentationNewBenchmarks
     [GlobalCleanup(Target = nameof(GetRequestForAspNetCoreApp))]
     public void GetRequestForAspNetCoreAppGlobalCleanup()
     {
-        if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithInstrumentation)
+        if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithInstrumentationLibrary)
         {
             this.httpClient.Dispose();
             this.app.DisposeAsync().GetAwaiter().GetResult();
             this.tracerProvider.Dispose();
+        }
+        else if (this.EnableInstrumentation == EnableInstrumentationOption.DiagnosticSourceSubscription)
+        {
+            this.httpClient.Dispose();
+            this.app.DisposeAsync().GetAwaiter().GetResult();
+            this.diagnosticSourceSubscriber.Dispose();
         }
         else
         {
@@ -178,7 +185,7 @@ public class AspNetCoreInstrumentationNewBenchmarks
     {
         var builder = WebApplication.CreateBuilder();
         builder.Logging.ClearProviders();
-        if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithMiddleware)
+        if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithMiddlewareInstrumentation)
         {
             builder.Services.AddSingleton<TelemetryMiddleware>();
 
@@ -190,8 +197,7 @@ public class AspNetCoreInstrumentationNewBenchmarks
                 ActivityStopped = activity => { },
             });
         }
-
-        if (this.EnableInstrumentation == EnableInstrumentationOption.DiagnosticSourceSubscription)
+        else if (this.EnableInstrumentation == EnableInstrumentationOption.DiagnosticSourceSubscription)
         {
             ActivitySource.AddActivityListener(new ActivityListener
             {
@@ -201,13 +207,13 @@ public class AspNetCoreInstrumentationNewBenchmarks
                 ActivityStopped = activity => { },
             });
 
-            DiagnosticListener.AllListeners.Subscribe(new DiagnosticSourceSubscriber());
+            this.diagnosticSourceSubscriber = DiagnosticListener.AllListeners.Subscribe(new DiagnosticSourceSubscriber());
         }
 
         var app = builder.Build();
         app.MapGet("/", async context => await context.Response.WriteAsync($"Hello World!"));
 
-        if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithMiddleware)
+        if (this.EnableInstrumentation == EnableInstrumentationOption.TracesWithMiddlewareInstrumentation)
         {
             app.UseMiddleware<TelemetryMiddleware>();
         }

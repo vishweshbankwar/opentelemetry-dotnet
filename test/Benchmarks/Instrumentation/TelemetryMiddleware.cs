@@ -35,6 +35,7 @@ public class TelemetryMiddleware : IMiddleware
             var activity = Activity.Current;
 
             await next(context).ConfigureAwait(false);
+
             this.OnRequestEnd(context, context.Response.StatusCode, null);
         }
         catch (Exception ex)
@@ -91,7 +92,7 @@ public class TelemetryMiddleware : IMiddleware
         // and instrumentation library creates a new activity (different one from framework)
         // Adding it here in order to do 1:1 comparison
         // This has potential of improvement.
-        var tagValue = activity.GetTagValue("IsCreatedByInstrumentation");
+        // var tagValue = activity.GetTagValue("IsCreatedByInstrumentation");
     }
 }
 #endif
