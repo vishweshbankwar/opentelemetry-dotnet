@@ -2,6 +2,7 @@
   <PropertyGroup>
     <Description>Unit test project for OpenTelemetry</Description>
     <TargetFrameworks>$(TargetFrameworksForTests)</TargetFrameworks>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
     <NoWarn>$(NoWarn),CS0618</NoWarn>
 
     <!-- this is temporary. will remove in future PR. -->
